@@ -89,4 +89,4 @@ gfw.parse(path)
 if __name__ == '__main__':
     # text = "天安门事件，港独，台独，还有什么敏感词！"
     # result = gfw.filter(text)
-    app.run()
+    app.run(host="0.0.0.0", port=5000)
