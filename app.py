@@ -22,6 +22,10 @@ def filter_words():
         data = request.json
         if isinstance(data, dict):
             gfw.dict_res(data)
+        # elif isinstance(data, list):
+        #     gfw.list_res(data)
+        # elif isinstance(data, str):
+        #     gfw.str_res(data)
         print("过滤后：", data)
         return data
 
