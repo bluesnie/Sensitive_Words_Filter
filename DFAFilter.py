@@ -16,6 +16,11 @@ class DFAFilter(object):
         self.delimit = '\x00'  # 限定
 
     def add(self, keyword):
+        """
+        添加敏感词
+        :param keyword: 单个敏感词
+        :return:
+        """
         keyword = keyword.lower()  # 关键词英文变为小写
         chars = keyword.strip()  # 关键字去除首尾空格和换行
         if not chars:  # 如果关键词为空直接返回
@@ -39,36 +44,26 @@ class DFAFilter(object):
             level[self.delimit] = 0
 
     def parse(self, path):
+        """
+        解析敏感词文件，生成敏感词链表
+        :param path: 敏感词文件路径
+        :return:
+        """
         with open(path, encoding='utf-8') as f:
             for keyword in f:
                 self.add(str(keyword).strip())
         # print(self.keyword_chains)
 
     def filter(self, message, repl="*"):
-        # if isinstance(message, list):
-        #     return message
-        # elif isinstance(message, int):
-        #     return message
-        # if isinstance(message, dict):       # 字段递归调用
-        #     for k, v in message.items():
-        #         if k in EXCLUDE_KEY:        # 排除关键字
-        #             message[k] = v
-        #             continue
-        #         elif isinstance(v, str):
-        #             res = re.findall(URL_PATTERN, v)
-        #             if res and "media" in res[0][2]:        # 排除静态资源
-        #                 message[k] = v
-        #                 continue
-        #             elif res and "media" not in res[0][2]:  # 过滤用户自定义的url
-        #                 res = res[0][0] + self.filter(res[0][2])
-        #                 message[k] = res
-        #                 continue
-        #         message[k] = self.filter(v)
-        #     return message
-        # elif isinstance(message, NoneType):
-        #     return message
+        """
+        过滤文本
+        :param message: 需过滤的文本
+        :param repl: 敏感词替换字符
+        :return: (原文本，打特殊字符文本，敏感词列表)
+        """
         message = message.lower()
         ret = []
+        keyword = []
         start = 0
         while start < len(message):
             level = self.keyword_chains
@@ -81,6 +76,7 @@ class DFAFilter(object):
                     else:
                         ret.append(repl * step_ins)         # 计算数量
                         start += step_ins - 1
+                        keyword.append(message[start-1:start+step_ins-1])  # 敏感词加入列表中返回
                         break
                 else:
                     ret.append(message[start])
@@ -89,7 +85,8 @@ class DFAFilter(object):
                 ret.append(message[start])                  # 无敏感词
             start += 1
 
-        return ''.join(ret)
+        # return ''.join(ret)
+        return (message, ''.join(ret), keyword)
 
     def list_res(self, result):
         for index, value in enumerate(result):
